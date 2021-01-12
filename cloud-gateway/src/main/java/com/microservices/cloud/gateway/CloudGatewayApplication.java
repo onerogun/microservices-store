@@ -9,8 +9,12 @@ import org.springframework.cloud.circuitbreaker.resilience4j.ReactiveResilience4
 import org.springframework.cloud.circuitbreaker.resilience4j.Resilience4JCircuitBreakerFactory;
 import org.springframework.cloud.netflix.eureka.EnableEurekaClient;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.time.Duration;
+import java.util.Arrays;
 
 @SpringBootApplication
 @EnableEurekaClient
@@ -26,4 +30,6 @@ public class CloudGatewayApplication {
 		reactiveResilience4JCircuitBreakerFactory.configureCircuitBreakerRegistry(circuitBreakerRegistry);
 		return reactiveResilience4JCircuitBreakerFactory;
 	}
+
+
 }

@@ -25,6 +25,8 @@ public class Customer {
 	private String customerName;
 	private String customerEMail;
 
+	private Long userFK;
+
 	/*
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "customer_fk")

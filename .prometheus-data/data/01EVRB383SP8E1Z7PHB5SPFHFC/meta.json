@@ -1,0 +1,17 @@
+{
+	"ulid": "01EVRB383SP8E1Z7PHB5SPFHFC",
+	"minTime": 1610258400000,
+	"maxTime": 1610265600000,
+	"stats": {
+		"numSamples": 2225,
+		"numSeries": 10,
+		"numChunks": 20
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01EVRB383SP8E1Z7PHB5SPFHFC"
+		]
+	},
+	"version": 1
+}

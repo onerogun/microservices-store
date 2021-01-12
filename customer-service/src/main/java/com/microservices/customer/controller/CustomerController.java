@@ -5,6 +5,8 @@ import com.microservices.customer.service.CustomerService;
 import com.microservices.customer.wrapper.CustomerList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,9 +30,9 @@ public class CustomerController {
 	}
 	
 	@PostMapping("/save")
-	public Customer setCustomer(@RequestBody Customer customer) {
+	public ResponseEntity<Customer> setCustomer(@RequestBody Customer customer) {
 		log.info("Inside of setCustomer method of CustomerController class, in customer-service");
-		return customerService.saveCustomer(customer);
+		return new ResponseEntity<>(customerService.saveCustomer(customer), HttpStatus.OK);
 		
 	}
 	

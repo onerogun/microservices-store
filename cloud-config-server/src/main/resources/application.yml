@@ -11,3 +11,9 @@ spring:
           uri: https://github.com/onerogun/cloudconfiguration
           force-pull: true
 
+security:
+  user:
+    name: configUser
+    password: configPassword
+    role: SYSTEM
+

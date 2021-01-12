@@ -7,9 +7,12 @@ import com.microservices.order.repository.OrderRepository;
 import com.microservices.order.wrapper.OrderContentList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
@@ -21,6 +24,7 @@ import java.util.List;
 
 @Service
 @Slf4j
+@EnableBinding(Source.class)
 public class OrderService {
 
 	@Autowired
@@ -32,8 +36,8 @@ public class OrderService {
 	@Autowired
 	private RestTemplate restTemplate;
 
-
-	
+	@Autowired
+	private Source source;
 
 	@Transactional
 	public Order placeOrder(OrderContentList orders, Long userId) {
@@ -56,8 +60,24 @@ public class OrderService {
 		updateAvailableStock(orders);
 
 		Order savedOrder = orderRepository.save(order);
+
+
+		/**
+		 * Publish order to Message Broker(Rabbitmq) using Spring Cloud Stream and consume from email service
+		 * RabbitMQ does NOT queue if consumer(Listener is not up) or add <requiredGroups> in properties file
+		 */
+		if (savedOrder != null) {
+			publishEMail(savedOrder);
+		}
+
 		return   savedOrder;
 		
+	}
+
+
+	private void publishEMail(Order orderPlaced) {
+		source.output().send(MessageBuilder.withPayload(orderPlaced)
+				.setHeader("order",orderPlaced.getOrderId()).build());
 	}
 
 

@@ -1,9 +1,6 @@
 package com.microservices.order.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
 import org.hibernate.annotations.DynamicUpdate;
 
 import javax.persistence.*;
@@ -13,9 +10,6 @@ import java.util.List;
 
 @Entity
 @DynamicUpdate
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name="orders")	//Add table name to avoid wrong SQL hibernate join relation
 public class Order {
 	
@@ -32,4 +26,45 @@ public class Order {
 	@EqualsAndHashCode.Exclude		//to avoid LOMBOK errors
 	private List<OrderItem> orderItems;
 
+	public Order(Long orderId, LocalDateTime orderTime, Long customerId, List<OrderItem> orderItems) {
+		this.orderId = orderId;
+		this.orderTime = orderTime;
+		this.customerId = customerId;
+		this.orderItems = orderItems;
+	}
+
+	public Order() {
+	}
+
+	public Long getOrderId() {
+		return orderId;
+	}
+
+	public void setOrderId(Long orderId) {
+		this.orderId = orderId;
+	}
+
+	public LocalDateTime getOrderTime() {
+		return orderTime;
+	}
+
+	public void setOrderTime(LocalDateTime orderTime) {
+		this.orderTime = orderTime;
+	}
+
+	public Long getCustomerId() {
+		return customerId;
+	}
+
+	public void setCustomerId(Long customerId) {
+		this.customerId = customerId;
+	}
+
+	public List<OrderItem> getOrderItems() {
+		return orderItems;
+	}
+
+	public void setOrderItems(List<OrderItem> orderItems) {
+		this.orderItems = orderItems;
+	}
 }
