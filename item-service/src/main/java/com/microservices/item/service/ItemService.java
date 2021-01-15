@@ -19,10 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -124,6 +121,9 @@ public class ItemService {
         log.info("Inside of getItemFileLocations method  of ItemService class, item-service");
         PathObjList pathObjList = new PathObjList();
         pathObjList.setPathObjList(fileLocationRepository.findAllByItemId(itemId));
+      //  List<String> path = new ArrayList<>();
+       // fileLocationRepository.findAllByItemId(itemId).forEach(pathObj -> path.add(pathObj.getPath()));
+
         return pathObjList;
     }
 }

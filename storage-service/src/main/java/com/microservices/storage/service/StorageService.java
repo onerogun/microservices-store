@@ -34,36 +34,54 @@ public class StorageService {
 
     private final String FILE_PATH = "pics";
 
+
+
     @Autowired
     private Source source;
 
     @Autowired
     private RestTemplate restTemplate;
 
-    public Path save(Long id, MultipartFile file) {
+
+    /**
+     *
+     * @return Directory where files are saved
+     */
+    public String getPathToDirectory () {
+        return uploadDir + File.separator + FILE_PATH + File.separator;
+    }
+
+    public String save(Long id, MultipartFile file) {
         log.info("Inside of save method of StorageService class, storage-service");
-        log.info(uploadDir.toString());
-
-
-        Path location = Paths.get(uploadDir + File.separator + FILE_PATH + File.separator + StringUtils.cleanPath(String.valueOf(id)));
-
+        //Directory where files are saved
+        String pathToDir  = getPathToDirectory();
+        //Directory for each item
+        String dirName = StringUtils.cleanPath(String.valueOf(id));
+        //Inside of item owned directory
+        Path location = Paths.get(pathToDir + dirName);
+        //Create if it does not exist
         File directory = new File(String.valueOf(location));
         if(!directory.exists()) {
             directory.mkdir();
         }
-        location = Paths.get(location + File.separator  + StringUtils.cleanPath(UUID.randomUUID() +file.getOriginalFilename()));
+        //Add UUID in front of file name
+        String saveLocation =  StringUtils.cleanPath(String.valueOf(UUID.randomUUID())) +file.getOriginalFilename();
+        log.info(saveLocation);
+        location = Paths.get(pathToDir + dirName + File.separator  + saveLocation);
+
+
         try {
             Files.copy(file.getInputStream(), location, StandardCopyOption.REPLACE_EXISTING);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        log.info("File stored: " + location.toAbsolutePath());
+
 
         PathObj pathObj = new PathObj();
-        pathObj.setPath(location);
+        pathObj.setPath(saveLocation);
         pathObj.setItemId(id);
         publishPath(pathObj);
-        return location;
+        return saveLocation;
     }
 
     /**
@@ -74,18 +92,18 @@ public class StorageService {
         source.output().send(MessageBuilder.withPayload(pathObj).setHeader("itemId", pathObj.getItemId()).build());
     }
 
-    public byte[] getItemFiles(Long itemId) {
+    public byte[] getItemFiles(Long id,  String savedLocation) {
         log.info("Inside of getItemFiles method of StorageService class, storage-service");
-        PathObjList response= restTemplate.getForObject("http://item-service/items/getItemFileLocations/" + itemId, PathObjList.class);
+        // PathObjList response= restTemplate.getForObject("http://item-service/items/getItemFileLocations/" + itemId, PathObjList.class);
+        //Directory where files are saved
+        String pathToDir  = getPathToDirectory();
+        //Directory for each item
+        String dirName = StringUtils.cleanPath(String.valueOf(id));
 
-
-        Iterator<PathObj> iterator = response.getPathObjList().iterator();
-
-        while (iterator.hasNext()) {
-                    Path path = iterator.next().getPath();
-
-                log.info(path.toAbsolutePath().toString());
-                if (Files.exists(path)) {
+        log.info(savedLocation);
+        //Inside of item owned directory
+        Path path =  Paths.get(pathToDir + dirName + File.separator  + savedLocation);
+                if (Files.exists(path)){
                     try {
 
                         DataInputStream dataInputStream = new DataInputStream(Files.newInputStream(path));
@@ -97,10 +115,7 @@ public class StorageService {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                 }
-
-        }
         return null;
     }
 }
