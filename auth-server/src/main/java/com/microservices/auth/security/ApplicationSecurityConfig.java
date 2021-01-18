@@ -2,12 +2,14 @@ package com.microservices.auth.security;
 
 
 import com.microservices.auth.applicationusers.ApplicationUserDetailsService;
-import com.microservices.auth.applicationusers.UserRoles;
 import com.microservices.auth.jwt.JwtConfig;
 import com.microservices.auth.jwt.JwtTokenVerifier;
 import com.microservices.auth.jwt.JwtUsernameAndPasswordAuthenticationFilter;
+import com.microservices.auth.repository.UserRepository;
 import com.microservices.auth.tokenrepo.TokenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -18,13 +20,8 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.cors.CorsConfigurationSource;
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import javax.crypto.SecretKey;
-
-import java.util.Arrays;
 
 import static com.microservices.auth.applicationusers.UserRoles.*;
 
@@ -32,6 +29,7 @@ import static com.microservices.auth.applicationusers.UserRoles.*;
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableBinding(Source.class)
 public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
 
     private final PasswordEncoder passwordEncoder;
@@ -39,17 +37,21 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
     private final SecretKey secretKey;
     private final JwtConfig jwtConfig;
     private final TokenRepository tokenRepository;
+    private final UserRepository userRepository;
+    private final Source source;
 
     @Autowired
     public ApplicationSecurityConfig(PasswordEncoder passwordEncoder,
                                      ApplicationUserDetailsService applicationUserService,
                                      SecretKey secretKey,
-                                     JwtConfig jwtConfig, TokenRepository tokenRepository) {
+                                     JwtConfig jwtConfig, TokenRepository tokenRepository, UserRepository userRepository, Source source) {
         this.passwordEncoder = passwordEncoder;
         this.applicationUserDetailsService = applicationUserService;
         this.secretKey = secretKey;
         this.jwtConfig = jwtConfig;
         this.tokenRepository = tokenRepository;
+        this.userRepository = userRepository;
+        this.source = source;
     }
 
     @Override
@@ -59,13 +61,13 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
-                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey,tokenRepository))
+                .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey,tokenRepository, userRepository, source))
 
-                .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig),JwtUsernameAndPasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig, userRepository),JwtUsernameAndPasswordAuthenticationFilter.class)
 
                 .authorizeRequests()
                 .antMatchers("/auth/save", "/auth/saveCustomer").permitAll()
-                .antMatchers("/auth/delete/*", "/auth/update/*", "/auth/getAll", "/auth/getUser/*").hasRole(ADMIN.name())
+                .antMatchers("/auth/delete/*", "/auth/update/*", "/auth/getAll", "/auth/getUser/*").hasAnyRole(ADMIN.name(), USER.name(), PRIME_USER.name())
                 .anyRequest().authenticated();
 
     }

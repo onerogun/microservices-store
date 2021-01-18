@@ -22,6 +22,7 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.stream.Collectors;
 
 
 @Service
@@ -125,5 +126,12 @@ public class ItemService {
        // fileLocationRepository.findAllByItemId(itemId).forEach(pathObj -> path.add(pathObj.getPath()));
 
         return pathObjList;
+    }
+
+    public List<String> search(String word) {
+        List<String> searchResult =
+        itemRepository.findByItemNameStartingWith(word)
+                .stream().map(item -> item.getItemName()).limit(10).collect(Collectors.toList());
+        return searchResult;
     }
 }

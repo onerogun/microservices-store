@@ -31,6 +31,12 @@ public class ItemController {
         return new ResponseEntity<>(itemService.getItems(), HttpStatus.OK);
     }
 
+    @GetMapping("/searchItems/{word}")
+    public ResponseEntity<List<String>> searchItems(@PathVariable String word) {
+        log.info("Inside of searchItems method of ItemController Class in item-service");
+        return new ResponseEntity<>(itemService.search(word), HttpStatus.OK);
+    }
+
     @GetMapping("/getItemsPage")
     public ResponseEntity<Map<String, Object>> getItemsPage(@RequestParam(name = "pageNo", defaultValue = "0") String pageNo,
                                                             @RequestParam(name = "pageSize", defaultValue = "5") String pageSize,

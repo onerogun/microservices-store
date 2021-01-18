@@ -2,14 +2,14 @@ package com.microservices.itemdetailsreactive.controller;
 
 
 import com.microservices.itemdetailsreactive.entity.ItemDetails;
+import com.microservices.itemdetailsreactive.entity.ItemDetailsList;
 import com.microservices.itemdetailsreactive.service.ItemDetailsService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
 
 @RestController
 @RequestMapping("/itemDetails")
@@ -23,31 +23,28 @@ public class ItemDetailsController {
     }
 
     @PostMapping(value = "/saveItemDetails")
-    public void saveItemDetails(@RequestBody ItemDetails itemDetails) {
+    public void saveItemDetails(@RequestBody ItemDetailsList itemDetailsList) {
         log.info("Inside of saveItemDetails method of ItemDetailsController, item-details-reactive");
-        itemDetailsService.saveItemDetails(itemDetails);
+        itemDetailsService.saveItemDetails(itemDetailsList);
     }
 
     @GetMapping(value = "/getItemDetails/{itemId}", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Mono<ItemDetails> getItemDetails(@PathVariable Long itemId) {
+    public Mono<ItemDetailsList> getItemDetails(@PathVariable Long itemId) {
         log.info("Inside of getItemDetails method of ItemDetailsController, item-details-reactive");
-        return itemDetailsService.getItemDetails(itemId);
+        return itemDetailsService.getItemDetailsList(itemId);
     }
 
     @GetMapping(value = "/getItemDetailsfake", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
-    public Mono<ItemDetails> getItemDetailsfake() {
+    public Mono<ItemDetailsList> getItemDetailsfake() {
         log.info("Inside of getItemDetails method of ItemDetailsController, item-details-reactive");
 
-        Map<String, String> map = new HashMap<>();
-        map.put("value", "valuevalue");
-        map.put("value1", "valuevalue1");
-        map.put("value2", "valuevalue2");
-        map.put("value3", "valuevalue3");
+        ItemDetails itemDetails = new ItemDetails();
+        itemDetails.setNameOf("keyy");
+        itemDetails.setValueOf("valuee");
 
-        ItemDetails itemDetails = new ItemDetails(2l, map);
-        itemDetails.setId("dwer");
 
-        return Mono.just(itemDetails);
+
+        return Mono.just(new ItemDetailsList("asdasdasd",73l, List.of(itemDetails)));
     }
 
 }

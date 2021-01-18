@@ -2,11 +2,14 @@ package com.microservices.auth.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
+import com.microservices.auth.repository.UserRepository;
 import com.microservices.auth.tokenrepo.TokenInDB;
 import com.microservices.auth.tokenrepo.TokenRepository;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpMethod;
+import org.springframework.cloud.stream.annotation.EnableBinding;
+import org.springframework.cloud.stream.messaging.Source;
+import org.springframework.integration.support.MessageBuilder;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +32,8 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     private final JwtConfig jwtConfig;
     private final SecretKey secretKey;
     private final TokenRepository tokenRepository;
+    private final UserRepository userRepository;
+    private final Source source;
 
 
 
@@ -36,11 +41,13 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
     public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authenticationManager,
                                                       JwtConfig jwtConfig,
-                                                      SecretKey secretKey, TokenRepository tokenRepository) {
+                                                      SecretKey secretKey, TokenRepository tokenRepository, UserRepository userRepository, Source source) {
         this.authenticationManager = authenticationManager;
         this.jwtConfig = jwtConfig;
         this.secretKey = secretKey;
         this.tokenRepository = tokenRepository;
+        this.userRepository = userRepository;
+        this.source = source;
     }
 
     @Override
@@ -93,8 +100,22 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
 
         String bearerToken = jwtConfig.getTokenPrefix() + token;
-        httpServletResponse.addHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.AUTHORIZATION);
-        httpServletResponse.addHeader(jwtConfig.getAuthorizationHeader(), bearerToken);
+        //httpServletResponse.addHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,
+         //       HttpHeaders.AUTHORIZATION + "," + HttpHeaders.COOKIE + "," + HttpHeaders.SET_COOKIE);
+        httpServletResponse.addHeader(HttpHeaders.AUTHORIZATION, bearerToken);
 
+        Long customerFk = userRepository.findByUserName(authentication.getName()).get().getCustomerFK();
+    /*    Cookie cookie = new Cookie("customerFk", String.valueOf(customerFk));
+       cookie.setMaxAge((int) Duration.ofDays(14).getSeconds());
+        cookie.setPath("/");
+        httpServletResponse.addCookie(cookie);
+*/
+      //  httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, HttpHeaders.SET_COOKIE);
+      //  httpServletResponse.setHeader(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS,HttpHeaders.COOKIE);
+       // httpServletResponse.setHeader(HttpHeaders.SET_COOKIE2, HttpHeaders.COOKIE + ":" + "custFK=" + String.valueOf(customerFk));
+        httpServletResponse.setHeader(org.springframework.http.HttpHeaders.COOKIE, "custFK=" + String.valueOf(customerFk));
+
+        log.info("Sending new sign-in alert email");
+        source.output().send(MessageBuilder.withPayload(customerFk).build());
     }
 }

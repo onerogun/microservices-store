@@ -2,7 +2,9 @@ package com.microservices.auth.service;
 
 import com.microservices.auth.VO.Customer;
 import com.microservices.auth.VO.CustomerSignup;
+import com.microservices.auth.VO.UserToSend;
 import com.microservices.auth.applicationusers.User;
+import com.microservices.auth.converter.UserToUserToSendConverter;
 import com.microservices.auth.repository.UserRepository;
 import com.microservices.auth.security.PasswordConfig;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +20,13 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordConfig passwordConfig;
     private final RestTemplate restTemplate;
+    private final UserToUserToSendConverter converter;
 
-    @Autowired
-    public AuthService(UserRepository userRepository, PasswordConfig passwordConfig, RestTemplate restTemplate) {
+    public AuthService(UserRepository userRepository, PasswordConfig passwordConfig, RestTemplate restTemplate, UserToUserToSendConverter converter) {
         this.userRepository = userRepository;
         this.passwordConfig = passwordConfig;
         this.restTemplate = restTemplate;
+        this.converter = converter;
     }
 
     public User save(User user) {
@@ -59,6 +62,11 @@ public class AuthService {
 
     public User getUser(Long id) {
         return  userRepository.findById(id).orElse(null);
+    }
+
+    public UserToSend getUserToSend(Long id) {
+       User user = userRepository.findById(id).orElse(null);
+       return converter.convert(user);
     }
 
     public User saveCustomer(CustomerSignup customerSignup) {

@@ -1,10 +1,7 @@
 package com.microservices.storage.service;
 
-import com.google.common.io.ByteStreams;
 import com.microservices.storage.VO.PathObj;
-import com.microservices.storage.VO.PathObjList;
 import lombok.extern.slf4j.Slf4j;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -22,7 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.*;
+import java.util.UUID;
 
 @Service
 @Slf4j

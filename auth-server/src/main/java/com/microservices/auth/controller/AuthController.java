@@ -1,6 +1,7 @@
 package com.microservices.auth.controller;
 
 import com.microservices.auth.VO.CustomerSignup;
+import com.microservices.auth.VO.UserToSend;
 import com.microservices.auth.applicationusers.User;
 import com.microservices.auth.service.AuthService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,11 +19,14 @@ public class AuthController {
 
     private final AuthService authService;
 
-    @Autowired
     public AuthController(AuthService authService) {
         this.authService = authService;
     }
 
+    @GetMapping("/checkJWT")
+    public ResponseEntity<Void> checkJWT() {
+        return ResponseEntity.ok().build();
+    }
 
     @PostMapping("/save")
     public ResponseEntity<User> save(@RequestBody User user) {
@@ -59,9 +63,9 @@ public class AuthController {
     }
 
     @GetMapping("/getUser/{id}")
-    public ResponseEntity<User> getUser(@PathVariable Long id) {
+    public ResponseEntity<UserToSend> getUserToSend(@PathVariable Long id) {
         log.info("Inside of getUser method of AuthController of auth-server");
-        User user = authService.getUser(id);
-        return new ResponseEntity<>(user, user == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+        UserToSend userToSend = authService.getUserToSend(id);
+        return new ResponseEntity<>(userToSend, userToSend == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
     }
 }

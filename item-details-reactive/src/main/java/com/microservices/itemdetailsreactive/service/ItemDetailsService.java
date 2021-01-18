@@ -1,6 +1,7 @@
 package com.microservices.itemdetailsreactive.service;
 
 import com.microservices.itemdetailsreactive.entity.ItemDetails;
+import com.microservices.itemdetailsreactive.entity.ItemDetailsList;
 import com.microservices.itemdetailsreactive.repository.ItemDetailsRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -18,19 +19,18 @@ public class ItemDetailsService {
     }
 
 
-    public Mono<ItemDetails> getItemDetails(Long itemId) {
+    public Mono<ItemDetailsList> getItemDetailsList(Long itemId) {
         log.info("Inside of getItemDetails method of ItemDetailsService, item-details-reactive");
         return itemDetailsRepository.findByItemId(itemId);
     }
 
-    public void saveItemDetails(ItemDetails itemDetails) {
+    public void saveItemDetails(ItemDetailsList itemDetailsList) {
         log.info("Inside of saveItemDetails method of ItemDetailsService, item-details-reactive");
-        itemDetailsRepository.existsByItemId(itemDetails.getItemId()).subscribe(aBoolean -> {
+        itemDetailsRepository.existsByItemId(itemDetailsList.getItemId()).subscribe(aBoolean -> {
             if (aBoolean) {
-                itemDetailsRepository.deleteByItemId(itemDetails.getItemId()).subscribe(System.out::println);
+                itemDetailsRepository.deleteByItemId(itemDetailsList.getItemId()).subscribe(System.out::println);
             }
         } );
-
-        itemDetailsRepository.insert(itemDetails).subscribe(System.out::println);
+        itemDetailsRepository.save(itemDetailsList).subscribe(itemDetailsList1 -> System.out.println("Saved: " + itemDetailsList1));
     }
 }
