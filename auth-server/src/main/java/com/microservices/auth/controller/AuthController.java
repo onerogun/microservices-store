@@ -68,4 +68,11 @@ public class AuthController {
         UserToSend userToSend = authService.getUserToSend(id);
         return new ResponseEntity<>(userToSend, userToSend == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
     }
+
+    @PostMapping("/updateUserReact")
+    public ResponseEntity<UserToSend> updateUserReact(@RequestBody UserToSend userToSend) {
+        log.info("Inside of getUser method of AuthController of auth-server");
+        UserToSend userUpdated = authService.UpdateReactUser(userToSend);
+        return new ResponseEntity<>(userUpdated, userUpdated == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+    }
 }

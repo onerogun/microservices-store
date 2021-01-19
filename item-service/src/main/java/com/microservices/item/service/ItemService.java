@@ -49,9 +49,9 @@ public class ItemService {
         Pageable page = PageRequest.of(pageNo, pageSize, sort);
         Page<Item> itemPage =itemRepository.findAll(page);
         response.put("data", itemPage.getContent());
-        response.put("Number of Pages", itemPage.getTotalPages());
-        response.put("Total number of elements", itemPage.getTotalElements());
-        response.put("Current page", itemPage.getNumber());
+        response.put("NumberOfTotalPages", itemPage.getTotalPages());
+        response.put("TotalNumberOfItems", itemPage.getTotalElements());
+        response.put("CurrentPage", itemPage.getNumber());
 
         return response;
     }
@@ -128,10 +128,10 @@ public class ItemService {
         return pathObjList;
     }
 
-    public List<String> search(String word) {
-        List<String> searchResult =
+    public List<Item> search(String word) {
+        List<Item> searchResult =
         itemRepository.findByItemNameStartingWith(word)
-                .stream().map(item -> item.getItemName()).limit(10).collect(Collectors.toList());
+                .stream().limit(10).collect(Collectors.toList());
         return searchResult;
     }
 }

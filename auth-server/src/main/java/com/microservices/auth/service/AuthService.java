@@ -4,10 +4,10 @@ import com.microservices.auth.VO.Customer;
 import com.microservices.auth.VO.CustomerSignup;
 import com.microservices.auth.VO.UserToSend;
 import com.microservices.auth.applicationusers.User;
+import com.microservices.auth.converter.UserToSendToUserConverter;
 import com.microservices.auth.converter.UserToUserToSendConverter;
 import com.microservices.auth.repository.UserRepository;
 import com.microservices.auth.security.PasswordConfig;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -20,13 +20,15 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordConfig passwordConfig;
     private final RestTemplate restTemplate;
-    private final UserToUserToSendConverter converter;
+    private final UserToUserToSendConverter toSendConverter;
+    private final UserToSendToUserConverter toUserConverter;
 
-    public AuthService(UserRepository userRepository, PasswordConfig passwordConfig, RestTemplate restTemplate, UserToUserToSendConverter converter) {
+    public AuthService(UserRepository userRepository, PasswordConfig passwordConfig, RestTemplate restTemplate, UserToUserToSendConverter converter, UserToSendToUserConverter toUserConverter) {
         this.userRepository = userRepository;
         this.passwordConfig = passwordConfig;
         this.restTemplate = restTemplate;
-        this.converter = converter;
+        this.toSendConverter = converter;
+        this.toUserConverter = toUserConverter;
     }
 
     public User save(User user) {
@@ -66,7 +68,7 @@ public class AuthService {
 
     public UserToSend getUserToSend(Long id) {
        User user = userRepository.findById(id).orElse(null);
-       return converter.convert(user);
+       return toSendConverter.convert(user);
     }
 
     public User saveCustomer(CustomerSignup customerSignup) {
@@ -104,6 +106,16 @@ public class AuthService {
             return updatedUser;
         }else {
             return null;
+        }
+    }
+
+    public UserToSend UpdateReactUser(UserToSend userToUpdate) {
+        if(userRepository.existsByUserName(userToUpdate.getUserName())) {
+            return null;
+        } else {
+            User updated = userRepository.save(toUserConverter.convert(userToUpdate));
+            UserToSend userUpdated = toSendConverter.convert(updated);
+          return userUpdated;
         }
     }
 }

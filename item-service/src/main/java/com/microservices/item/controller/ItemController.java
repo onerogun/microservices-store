@@ -32,7 +32,7 @@ public class ItemController {
     }
 
     @GetMapping("/searchItems/{word}")
-    public ResponseEntity<List<String>> searchItems(@PathVariable String word) {
+    public ResponseEntity<List<Item>> searchItems(@PathVariable String word) {
         log.info("Inside of searchItems method of ItemController Class in item-service");
         return new ResponseEntity<>(itemService.search(word), HttpStatus.OK);
     }

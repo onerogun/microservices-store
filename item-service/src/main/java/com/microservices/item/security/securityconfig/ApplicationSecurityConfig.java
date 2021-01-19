@@ -36,7 +36,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .and().addFilterBefore(jwtTokenVerifier, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 //.antMatchers("/items/getItems").permitAll()
-                .antMatchers("/items/deleteItem/*", "/items/addItem", "/items/updateItem").hasAnyRole(ADMIN.name())
+                .antMatchers("/items/deleteItem/*", "/items/addItem", "/items/updateItem").hasAnyRole(ADMIN.name(), PRIME_USER.name(), USER.name())
                 .anyRequest().authenticated();
     }
 
