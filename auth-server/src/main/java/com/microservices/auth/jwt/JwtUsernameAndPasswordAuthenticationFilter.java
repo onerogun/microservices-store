@@ -3,11 +3,11 @@ package com.microservices.auth.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.net.HttpHeaders;
 import com.microservices.auth.repository.UserRepository;
+import com.microservices.auth.streamchannel.OutputChannel;
 import com.microservices.auth.tokenrepo.TokenInDB;
 import com.microservices.auth.tokenrepo.TokenRepository;
 import io.jsonwebtoken.Jwts;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -33,7 +33,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
     private final SecretKey secretKey;
     private final TokenRepository tokenRepository;
     private final UserRepository userRepository;
-    private final Source source;
+    private final OutputChannel outputChannel;
 
 
 
@@ -41,13 +41,13 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
 
     public JwtUsernameAndPasswordAuthenticationFilter(AuthenticationManager authenticationManager,
                                                       JwtConfig jwtConfig,
-                                                      SecretKey secretKey, TokenRepository tokenRepository, UserRepository userRepository, Source source) {
+                                                      SecretKey secretKey, TokenRepository tokenRepository, UserRepository userRepository, OutputChannel outputChannel) {
         this.authenticationManager = authenticationManager;
         this.jwtConfig = jwtConfig;
         this.secretKey = secretKey;
         this.tokenRepository = tokenRepository;
         this.userRepository = userRepository;
-        this.source = source;
+        this.outputChannel = outputChannel;
     }
 
     @Override
@@ -116,6 +116,6 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         httpServletResponse.setHeader(org.springframework.http.HttpHeaders.COOKIE, "custFK=" + String.valueOf(customerFk));
 
         log.info("Sending new sign-in alert email");
-        source.output().send(MessageBuilder.withPayload(customerFk).build());
+        outputChannel.signInAlert().send(MessageBuilder.withPayload(customerFk).build());
     }
 }

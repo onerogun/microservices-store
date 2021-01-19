@@ -23,6 +23,13 @@ public class AuthController {
         this.authService = authService;
     }
 
+    @GetMapping("/resetPassword")
+    public ResponseEntity<String> resetPassword(@RequestParam String email) {
+        authService.sendPasswordResetMail(email);
+        String returnMessage = "We will send you a password reset e-mail if you have an account with submitted e-mail";
+        return new ResponseEntity<>(returnMessage, HttpStatus.OK);
+    }
+
     @GetMapping("/checkJWT")
     public ResponseEntity<Void> checkJWT() {
         return ResponseEntity.ok().build();
@@ -36,11 +43,11 @@ public class AuthController {
     }
 
     @PostMapping("/saveCustomer")
-    public ResponseEntity<User> saveCustomer(@RequestBody CustomerSignup customerSignup) {
+    public ResponseEntity<String> saveCustomer(@RequestBody CustomerSignup customerSignup) {
         log.info("Inside of saveCustomer method of AuthController of auth-server");
         log.info(customerSignup.toString());
-        User savedUser = authService.saveCustomer(customerSignup);
-        return new ResponseEntity<>(savedUser, savedUser == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+        ResponseEntity<String> responseEntity = authService.saveCustomer(customerSignup);
+        return responseEntity;
     }
 
     @GetMapping("/getAll")
@@ -74,5 +81,11 @@ public class AuthController {
         log.info("Inside of getUser method of AuthController of auth-server");
         UserToSend userUpdated = authService.UpdateReactUser(userToSend);
         return new ResponseEntity<>(userUpdated, userUpdated == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
+    }
+
+    @PostMapping("/resetPasswordByLink/{link}")
+    public ResponseEntity<String> passwordResetRequest(@PathVariable String link, @RequestBody String password) {
+        log.info("Inside of resetPassword method of AuthController of auth-server");
+        return authService.resetPassword(link, password);
     }
 }

@@ -25,6 +25,8 @@ public class User {
     @Enumerated(EnumType.STRING)
     private UserRoles roles;
 
+    @Column(name = "email")
+    private String userEMail;
     private Long customerFK;
 
     public User(String userName, String password, UserRoles roles) {

@@ -1,0 +1,17 @@
+{
+	"ulid": "01EWC3074QMT7HEZ99DS1KK15Z",
+	"minTime": 1610978400000,
+	"maxTime": 1610985600000,
+	"stats": {
+		"numSamples": 1425,
+		"numSeries": 10,
+		"numChunks": 15
+	},
+	"compaction": {
+		"level": 1,
+		"sources": [
+			"01EWC3074QMT7HEZ99DS1KK15Z"
+		]
+	},
+	"version": 1
+}

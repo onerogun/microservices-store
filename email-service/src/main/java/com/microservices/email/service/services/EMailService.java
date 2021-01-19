@@ -2,6 +2,7 @@ package com.microservices.email.service.services;
 
 import com.microservices.email.service.VO.Customer;
 import com.microservices.email.service.VO.Order;
+import com.microservices.email.service.VO.PasswordResetObj;
 import com.microservices.email.service.channel.InputChannel;
 import com.microservices.email.service.config.EMailConfig;
 import com.microservices.email.service.content.Content;
@@ -77,6 +78,23 @@ public class EMailService {
         String signInAlertSubject = " Security Alert: SIGN IN";
         String signInAlertBody = " your account signed-in.";
         eMailSender(customerFk,signInAlertSubject, signInAlertBody );
+    }
+
+    @StreamListener(InputChannel.PASSWORD_RESET_INPUT)
+    private void consumePasswordReset(PasswordResetObj passwordResetObj) {
+        log.info("Sending password reset EMail to the customer with email: " + passwordResetObj.getEmail());
+
+        JavaMailSenderImpl javaMailSender = getJavaMailSender();
+
+        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
+        simpleMailMessage.setFrom("passwordreset@store.com");
+        simpleMailMessage.setTo(passwordResetObj.getEmail());
+        simpleMailMessage.setSubject("Password reset request");
+        simpleMailMessage.setText("Click link to reset password \n" +
+                "http://localhost:3000/passwordReset/" + passwordResetObj.getResetLink()
+                        +"\n\n\n Link expires in 30 minutes! ");
+
+        javaMailSender.send(simpleMailMessage);
     }
 
     private void eMailSender(Long customerId, String subject, String body) {

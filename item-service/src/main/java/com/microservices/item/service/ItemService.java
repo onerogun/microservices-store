@@ -18,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -42,12 +43,16 @@ public class ItemService {
         return new ItemList(itemRepository.findAll());
     }
 
-    public Map<String, Object> getItemsByPage(int pageNo, int pageSize, String sortBy) {
+    public Map<String, Object> getItemsByPage(int pageNo, int pageSize
+            , String sortBy, Integer direction, Long min, Long max) {
         log.info("Inside of getItemsByPage method  of ItemService class, item-service");
         Map<String, Object> response = new HashMap<>();
-        Sort sort = Sort.by(sortBy);
+        Sort.Direction sortDirection = direction.equals(1) ? Sort.Direction.ASC : Sort.Direction.DESC;
+
+        Sort sort = Sort.by(sortDirection,sortBy);
+
         Pageable page = PageRequest.of(pageNo, pageSize, sort);
-        Page<Item> itemPage =itemRepository.findAll(page);
+        Page<Item> itemPage =itemRepository.findByItemPriceBetween(page, BigDecimal.valueOf(min), BigDecimal.valueOf(max));
         response.put("data", itemPage.getContent());
         response.put("NumberOfTotalPages", itemPage.getTotalPages());
         response.put("TotalNumberOfItems", itemPage.getTotalElements());

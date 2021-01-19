@@ -40,10 +40,14 @@ public class ItemController {
     @GetMapping("/getItemsPage")
     public ResponseEntity<Map<String, Object>> getItemsPage(@RequestParam(name = "pageNo", defaultValue = "0") String pageNo,
                                                             @RequestParam(name = "pageSize", defaultValue = "5") String pageSize,
-                                                            @RequestParam(name = "sortBy", defaultValue = "itemPrice") String sortBy
+                                                            @RequestParam(name = "sortBy", defaultValue = "itemPrice") String sortBy,
+                                                            @RequestParam(name= "direction", defaultValue = "1") Integer direction,
+                                                            @RequestParam(name = "min" , defaultValue = "0") Long min,
+                                                            @RequestParam(name = "max", defaultValue = "99999999999") Long max
                                                             ) {
         log.info("Inside of getItemsPage method of ItemController Class in item-service");
-        Map<String, Object> response =   itemService.getItemsByPage(Integer.valueOf(pageNo), Integer.valueOf(pageSize), sortBy);
+        Map<String, Object> response =
+                itemService.getItemsByPage(Integer.valueOf(pageNo), Integer.valueOf(pageSize), sortBy, direction, min, max);
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
