@@ -1,6 +1,8 @@
 package com.microservices.order.wrapper;
 
+import lombok.ToString;
 
+@ToString
 public class OrderContent {
 	
 
