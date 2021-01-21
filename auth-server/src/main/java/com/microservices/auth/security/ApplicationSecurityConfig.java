@@ -60,7 +60,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                 .csrf().disable()
                 .sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests().antMatchers("/auth/resetPassword","/auth/resetPasswordByLink/*", "/auth/save", "/auth/saveCustomer").permitAll().and()
+                .and().authorizeRequests().antMatchers("/auth/passwordReset/checkLinkValidity/*","/auth/resetPassword","/auth/resetPasswordByLink/*", "/auth/save", "/auth/saveCustomer").permitAll().and()
                 .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey,tokenRepository, userRepository, outputChannel))
                 .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig, userRepository),JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()

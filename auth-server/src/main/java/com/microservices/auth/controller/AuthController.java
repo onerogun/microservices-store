@@ -88,4 +88,10 @@ public class AuthController {
         log.info("Inside of resetPassword method of AuthController of auth-server");
         return authService.resetPassword(link, password);
     }
+
+    @GetMapping("/passwordReset/checkLinkValidity/{link}")
+    public ResponseEntity<Void> checkLinkValidity(@PathVariable String link) {
+        log.info("Inside of checkLinkValidity method of AuthController of auth-server");
+        return authService.checkLinkValidity(link);
+    }
 }

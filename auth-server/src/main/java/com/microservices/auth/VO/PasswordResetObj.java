@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.sql.Date;
+import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Getter
@@ -20,4 +22,5 @@ public class PasswordResetObj {
 
     private String email;
     private String resetLink;
+    private LocalDateTime linkExpireDateTime;
 }

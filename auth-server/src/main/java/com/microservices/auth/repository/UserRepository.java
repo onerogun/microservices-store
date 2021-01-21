@@ -8,9 +8,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @DynamicUpdate
-@Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserName(String userName);
     boolean existsByUserEMail(String userEMail);
+    Optional<User> findByUserEMail(String userEMail);
     Optional<User> findByUserName(String userName);
 }

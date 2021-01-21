@@ -8,4 +8,5 @@ import java.util.Optional;
 public interface PasswordResetObjRepository extends JpaRepository<PasswordResetObj, Long> {
     boolean existsByResetLink(String resetLink);
     Optional<PasswordResetObj> findByResetLink(String resetLink);
+    void deleteByResetLink(String resetLink);
 }

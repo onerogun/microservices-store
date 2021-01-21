@@ -19,6 +19,10 @@ import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import javax.transaction.Transactional;
+import java.sql.Date;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -157,6 +161,7 @@ public class AuthService {
            PasswordResetObj passwordResetObj = new PasswordResetObj();
            passwordResetObj.setEmail(email);
            passwordResetObj.setResetLink(resetLink);
+           passwordResetObj.setLinkExpireDateTime(LocalDateTime.now().plusMinutes(30));
 
            PasswordResetObj saved = passwordResetObjRepository.save(passwordResetObj);
 
@@ -164,15 +169,55 @@ public class AuthService {
        }
     }
 
+
+
+    @Transactional
     public ResponseEntity<String> resetPassword(String link, String password) {
         log.info("In resetPassword method of AuthService class, auth-server");
         if (passwordResetObjRepository.existsByResetLink(link)) {
+            log.info("Link exists checking validity, auth-server");
             PasswordResetObj passwordResetObj = passwordResetObjRepository.findByResetLink(link).get();
-            log.info("Resetting password: " + password   + "  \n" + passwordResetObj.toString());
+            if(passwordResetObj.getLinkExpireDateTime().isAfter(LocalDateTime.now())) {
 
-            return new ResponseEntity<>("Password has been successfully changed!", HttpStatus.ACCEPTED);
+                log.info("Resetting password: " + password + "  \n" + passwordResetObj.toString());
+                User userToResetPassword = userRepository.findByUserEMail(passwordResetObj.getEmail()).get();
+                String encodedPassw = passwordConfig.passwordEncoder().encode(password);
+                userToResetPassword.setPassword(encodedPassw);
+                User updatedUser = userRepository.save(userToResetPassword);
+                log.info("Updated passw: " + updatedUser.getPassword());
+                log.info("saved passw: " + encodedPassw );
+                if(!updatedUser.getPassword().equals(encodedPassw)) {
+                    return new ResponseEntity<>("Update failed", HttpStatus.NOT_ACCEPTABLE);
+                }
+                passwordResetObjRepository.deleteByResetLink(link);
+                return new ResponseEntity<>("Password has been successfully changed!", HttpStatus.ACCEPTED);
+            } else {
+                log.info("Link expired!");
+                passwordResetObjRepository.deleteByResetLink(link);
+                return new ResponseEntity<>("Link expired!", HttpStatus.BAD_REQUEST);
+            }
         } else {
-            return new ResponseEntity<>("Link expired!", HttpStatus.BAD_REQUEST);
+            log.info("Link does not exist!");
+            return new ResponseEntity<>("Link does not exist!", HttpStatus.BAD_REQUEST);
+        }
+    }
+
+    @Transactional
+    public ResponseEntity<Void> checkLinkValidity(String link) {
+        log.info("In checkLinkValidity method of AuthService class, auth-server");
+        if (passwordResetObjRepository.existsByResetLink(link)) {
+            PasswordResetObj passwordResetObj = passwordResetObjRepository.findByResetLink(link).get();
+            if(passwordResetObj.getLinkExpireDateTime().isAfter(LocalDateTime.now())) {
+                log.info("Link valid!");
+                return ResponseEntity.ok().build();
+            } else {
+                log.info("Link expired!");
+                passwordResetObjRepository.deleteByResetLink(link);
+                return ResponseEntity.badRequest().build();
+            }
+        } else {
+            log.info("Link does not exist!");
+            return ResponseEntity.badRequest().build();
         }
     }
 }
