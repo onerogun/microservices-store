@@ -5,6 +5,7 @@ import com.microservices.order.entity.Order;
 import com.microservices.order.entity.OrderItem;
 import com.microservices.order.service.OrderService;
 import com.microservices.order.wrapper.OrderContentList;
+import com.microservices.order.wrapper.SavedCartWithOrderContentList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,16 +22,24 @@ public class OrderController {
 	@Autowired
 	private OrderService orderService;
 
-	@PostMapping("/saveCart/{userId}")
-	public ResponseEntity<List<OrderItem>> saveCartReturnOrderItem(@RequestBody OrderContentList orderContentList, @PathVariable Long userId) {
-		log.info("Inside of saveCart method of OrderController class, order-service");
-		return orderService.saveCart(orderContentList, userId);
+	@GetMapping("/getSavedCartWithOrderContentList/{customerId}")
+	public ResponseEntity<SavedCartWithOrderContentList> getSavedCartWithOrderContentList(@PathVariable Long customerId) {
+		log.info("Inside of getSavedCartWithOrderContentList method of OrderController class, order-service");
+		return orderService.getSavedCartWithOrderContentList(customerId);
 	}
+
+	@PostMapping("/saveCart/{customerId}")
+	public ResponseEntity<List<OrderItem>> saveCartReturnOrderItem(@RequestBody OrderContentList orderContentList, @PathVariable Long customerId) {
+		log.info("Inside of saveCartReturnOrderItem method of OrderController class, order-service");
+		return orderService.saveCart(orderContentList, customerId);
+	}
+
+
 
 	@PostMapping("/getCartDetails")
 	public ResponseEntity<List<OrderItem>> getCartDetails(@RequestBody OrderContentList orderContentList) {
 		log.info("Inside of getCartDetails method of OrderController class, order-service");
-		return orderService.saveCart(orderContentList, null);
+		return orderService.getCartDetails(orderContentList);
 	}
 
 

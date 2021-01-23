@@ -1,10 +1,15 @@
 package com.microservices.order.service;
 
 import com.microservices.order.converter.ConverterOrderContentOrderItem;
+import com.microservices.order.converter.OrderItemOrderContentConverter;
 import com.microservices.order.entity.Order;
 import com.microservices.order.entity.OrderItem;
+import com.microservices.order.entity.SavedCart;
 import com.microservices.order.repository.OrderRepository;
+import com.microservices.order.repository.SavedCartRepository;
+import com.microservices.order.wrapper.OrderContent;
 import com.microservices.order.wrapper.OrderContentList;
+import com.microservices.order.wrapper.SavedCartWithOrderContentList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
@@ -34,10 +39,16 @@ public class OrderService {
 	private ConverterOrderContentOrderItem converterOrderContentOrderItem;
 
 	@Autowired
+	private OrderItemOrderContentConverter orderItemOrderContentConverter;
+
+	@Autowired
 	private RestTemplate restTemplate;
 
 	@Autowired
 	private Source source;
+
+	@Autowired
+	private SavedCartRepository savedCartRepository;
 
 	@Transactional
 	public Order placeOrder(OrderContentList orders, Long userId) {
@@ -107,14 +118,48 @@ public class OrderService {
 		log.info(response);
 	}
 
-	public ResponseEntity<List<OrderItem>> saveCart(OrderContentList orderContentList, Long userId) {
+	public ResponseEntity<List<OrderItem>> saveCart(OrderContentList orderContentList, Long customerId) {
 		log.info("Inside of saveCart method of OrderService class, order-service");
+		log.info("customerId: " + customerId);
+		List<OrderItem> orderItemList = getOrderItemList(orderContentList);
+
+		SavedCart savedCart = new SavedCart();
+		savedCart.setCustomerId(customerId);
+		savedCart.setOrderItemList(orderItemList);
+		savedCartRepository.save(savedCart);
+
+		return new ResponseEntity<>(orderItemList, HttpStatus.OK);
+	}
+
+	public ResponseEntity<List<OrderItem>> getCartDetails(OrderContentList orderContentList) {
+		log.info("Inside of getCartDetails method of OrderService class, order-service");
 		log.info(orderContentList.getOrderContentList().toString());
+		return new ResponseEntity<>(getOrderItemList(orderContentList), HttpStatus.OK);
+	}
+
+	private List<OrderItem> getOrderItemList(OrderContentList orderContentList) {
+		log.info("Inside of getOrderItemList method of OrderService class, order-service");
+		log.info("Order content: " +orderContentList.getOrderContentList().toString());
 		List<OrderItem> orderItemList = new ArrayList<>();
 		orderContentList.getOrderContentList().forEach(orderContent -> {
 			orderItemList.add( converterOrderContentOrderItem.convert(orderContent));
 		});
+		return orderItemList;
+	}
 
-		return new ResponseEntity<>(orderItemList, HttpStatus.OK);
+	public ResponseEntity<SavedCartWithOrderContentList> getSavedCartWithOrderContentList(Long customerId) {
+		log.info("Inside of getSavedCartWithOrderContentList method of OrderService class, order-service");
+		SavedCart savedCart = savedCartRepository.findById(customerId).orElse(null);
+		log.info(savedCart.toString());
+		if(savedCart != null) {
+			List<OrderContent> orderContent = new ArrayList<>();
+			savedCart.getOrderItemList().forEach(orderItem ->
+					orderContent.add(orderItemOrderContentConverter.convert(orderItem)));
+			OrderContentList orderContentList = new OrderContentList(orderContent);
+
+			return new ResponseEntity<>(new SavedCartWithOrderContentList(orderContentList,savedCart), HttpStatus.OK);
+		}else {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 }

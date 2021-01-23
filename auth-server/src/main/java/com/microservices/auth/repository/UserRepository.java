@@ -3,7 +3,6 @@ package com.microservices.auth.repository;
 import com.microservices.auth.applicationusers.User;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
@@ -13,4 +12,5 @@ public interface UserRepository extends JpaRepository<User, Long> {
     boolean existsByUserEMail(String userEMail);
     Optional<User> findByUserEMail(String userEMail);
     Optional<User> findByUserName(String userName);
+    Optional<User> findByUserNameOrUserEMail(String userName, String userEMail);
 }
