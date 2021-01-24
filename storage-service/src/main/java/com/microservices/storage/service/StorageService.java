@@ -1,12 +1,11 @@
 package com.microservices.storage.service;
 
-import com.microservices.storage.SourceChannels;
+import com.microservices.storage.streamchannels.SourceChannels;
 import com.microservices.storage.VO.PathObj;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
-import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.http.ResponseEntity;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;

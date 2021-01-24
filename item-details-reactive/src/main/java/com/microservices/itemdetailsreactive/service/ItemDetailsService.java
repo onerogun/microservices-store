@@ -1,6 +1,5 @@
 package com.microservices.itemdetailsreactive.service;
 
-import com.microservices.itemdetailsreactive.entity.ItemDetails;
 import com.microservices.itemdetailsreactive.entity.ItemDetailsList;
 import com.microservices.itemdetailsreactive.repository.ItemDetailsRepository;
 import lombok.extern.slf4j.Slf4j;
