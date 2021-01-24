@@ -1,11 +1,13 @@
 package com.microservices.storage.service;
 
+import com.microservices.storage.SourceChannels;
 import com.microservices.storage.VO.PathObj;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.messaging.Source;
+import org.springframework.http.ResponseEntity;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
@@ -23,7 +25,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
-@EnableBinding(Source.class)
+@EnableBinding(SourceChannels.class)
 public class StorageService {
 
     @Value("${app.upload.dir:${user.home}}")
@@ -34,7 +36,7 @@ public class StorageService {
 
 
     @Autowired
-    private Source source;
+    private SourceChannels sourceChannels;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -86,7 +88,7 @@ public class StorageService {
      */
     private void publishPath(PathObj pathObj) {
         log.info("Inside of publishPath method of StorageService class, storage-service");
-        source.output().send(MessageBuilder.withPayload(pathObj).setHeader("itemId", pathObj.getItemId()).build());
+        sourceChannels.outputFileCreated().send(MessageBuilder.withPayload(pathObj).setHeader("itemId", pathObj.getItemId()).build());
     }
 
     public byte[] getItemFiles(Long id,  String savedLocation) {
@@ -114,5 +116,37 @@ public class StorageService {
                     }
                 }
         return null;
+    }
+
+    public ResponseEntity<Void> deleteItemFile(Long id, String loc) {
+        log.info("Inside of deleteItemFiles method of StorageService class, storage-service");
+        String pathToDir  = getPathToDirectory();
+        //Directory for each item
+        String dirName = StringUtils.cleanPath(String.valueOf(id));
+        //Inside of item owned directory
+        Path path =  Paths.get(pathToDir + dirName + File.separator  + loc);
+
+        boolean deleted = false;
+        try {
+            deleted =  Files.deleteIfExists(path);
+            if(deleted){
+                publishDeletedPath(id, loc);
+            }
+
+        } catch (IOException e) {
+            deleted = false;
+            e.printStackTrace();
+        }
+
+        return  (deleted ?  ResponseEntity.ok().build() : ResponseEntity.notFound().build());
+    }
+
+
+    private void publishDeletedPath(Long id, String loc) {
+        log.info("Inside of publishDeletedPath method of StorageService class, storage-service");
+        PathObj pathObj = new PathObj();
+        pathObj.setItemId(id);
+        pathObj.setPath(loc);
+        sourceChannels.outputFileDeleted().send(MessageBuilder.withPayload(pathObj).build());
     }
 }

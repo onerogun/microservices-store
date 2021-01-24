@@ -1,17 +1,17 @@
 package com.microservices.item.service;
 
+import com.microservices.item.VO.ItemPathList;
 import com.microservices.item.VO.OrderContentList;
 import com.microservices.item.VO.PathObj;
-import com.microservices.item.VO.PathObjList;
 import com.microservices.item.entity.Item;
 import com.microservices.item.repository.FileLocationRepository;
 import com.microservices.item.repository.ItemRepository;
+import com.microservices.item.subscribechannel.InputChannels;
 import com.microservices.item.wrapper.ItemList;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.stream.annotation.EnableBinding;
 import org.springframework.cloud.stream.annotation.StreamListener;
-import org.springframework.cloud.stream.messaging.Sink;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,8 +19,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Collectors;
@@ -28,7 +30,7 @@ import java.util.stream.Collectors;
 
 @Service
 @Slf4j
-@EnableBinding(Sink.class)
+@EnableBinding(InputChannels.class)
 public class ItemService {
 
     @Autowired
@@ -116,21 +118,41 @@ public class ItemService {
         }
     }
 
-    @StreamListener(Sink.INPUT)
+    @StreamListener(InputChannels.INPUT_FILE_CREATED)
     public void saveFileLocation(PathObj pathObj) {
         log.info("Inside of saveFileLocation method  of ItemService class, item-service");
         log.info(pathObj.toString());
-        fileLocationRepository.insert(pathObj);
+        ItemPathList itemPathList = fileLocationRepository.findById(pathObj.getItemId()).orElse(null);
+        if(itemPathList != null) {
+            itemPathList.getPathList().add(pathObj.getPath());
+            fileLocationRepository.save(itemPathList);
+        }else {
+            ItemPathList newPathList = new ItemPathList();
+            newPathList.setItemId(pathObj.getItemId());
+            List<String> pathList = new ArrayList<>();
+            pathList.add(pathObj.getPath());
+            newPathList.setPathList(pathList);
+
+            fileLocationRepository.save(newPathList);
+        }
     }
 
-    public PathObjList getItemFileLocations(Long itemId) {
-        log.info("Inside of getItemFileLocations method  of ItemService class, item-service");
-        PathObjList pathObjList = new PathObjList();
-        pathObjList.setPathObjList(fileLocationRepository.findAllByItemId(itemId));
-      //  List<String> path = new ArrayList<>();
-       // fileLocationRepository.findAllByItemId(itemId).forEach(pathObj -> path.add(pathObj.getPath()));
+    @StreamListener(InputChannels.INPUT_FILE_DELETED)
+    private void deleteFileLocation(PathObj pathObj) {
+        log.info("Inside of deleteFileLocation method  of ItemService class, item-service");
+        log.info(pathObj.toString());
+        ItemPathList currentPathList = fileLocationRepository.findById(pathObj.getItemId()).get();
+        currentPathList.setPathList(currentPathList.getPathList().stream()
+                .filter(path -> !path.equals(pathObj.getPath())).collect(Collectors.toList()));
 
-        return pathObjList;
+        fileLocationRepository.save(currentPathList);
+    }
+
+    public ItemPathList getItemFileLocations(Long itemId) {
+        log.info("Inside of getItemFileLocations method  of ItemService class, item-service");
+        ItemPathList itemPathList = fileLocationRepository.findById(itemId).orElse(null);
+
+        return itemPathList;
     }
 
     public List<Item> search(String word) {

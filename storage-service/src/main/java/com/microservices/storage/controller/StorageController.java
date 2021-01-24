@@ -35,4 +35,11 @@ public class StorageController {
         return new ResponseEntity<>(storageService.getItemFiles(id, loc), HttpStatus.OK);
     }
 
+    @DeleteMapping("/deleteItemFiles/{id}/{loc}")
+    public ResponseEntity<Void> deleteItemFiles(@PathVariable Long id, @PathVariable String loc) {
+        log.info("Inside of deleteItemFiles method of StorageController class, storage-service");
+        log.info("ID: " + id +  " path: " + loc);
+        return storageService.deleteItemFile(id, loc);
+    }
+
 }

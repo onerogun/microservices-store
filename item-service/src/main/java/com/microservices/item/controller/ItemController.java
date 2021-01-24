@@ -1,8 +1,7 @@
 package com.microservices.item.controller;
 
 import com.microservices.item.VO.OrderContentList;
-import com.microservices.item.VO.PathObj;
-import com.microservices.item.VO.PathObjList;
+import com.microservices.item.VO.ItemPathList;
 import com.microservices.item.entity.Item;
 import com.microservices.item.service.ItemService;
 import com.microservices.item.wrapper.ItemList;
@@ -14,7 +13,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 @RequestMapping("/items")
@@ -96,7 +94,7 @@ public class ItemController {
     }
 
     @GetMapping("/getItemFileLocations/{itemId}")
-    public ResponseEntity<PathObjList> getItemFileLocations(@PathVariable Long itemId) {
+    public ResponseEntity<ItemPathList> getItemFileLocations(@PathVariable Long itemId) {
        return new ResponseEntity<>(itemService.getItemFileLocations(itemId), HttpStatus.OK);
     }
 }
