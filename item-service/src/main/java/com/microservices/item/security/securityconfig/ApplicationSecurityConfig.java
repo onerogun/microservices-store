@@ -32,11 +32,11 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         http    .cors().and()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
-                .and().requestMatchers().antMatchers("/items/deleteItem/*", "/items/addItem", "/items/updateItem")
+                .and().requestMatchers().antMatchers("/items/deleteItem/*", "/items/addItem/*", "/items/updateItem/*", "/items/getUserItems/*")
                 .and().addFilterBefore(jwtTokenVerifier, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 //.antMatchers("/items/getItems").permitAll()
-                .antMatchers("/items/deleteItem/*", "/items/addItem", "/items/updateItem").hasAnyRole(ADMIN.name(), PRIME_USER.name(), USER.name())
+                .antMatchers("/items/deleteItem/*", "/items/addItem/*", "/items/updateItem/*", "/items/getUserItems/*").hasRole(ADMIN.name())
                 .anyRequest().authenticated();
     }
 

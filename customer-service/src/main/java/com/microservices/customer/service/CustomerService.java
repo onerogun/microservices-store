@@ -37,7 +37,7 @@ public class CustomerService {
 
 
 	public Customer getCustomer(Long customerId) {
-		log.info("Inside of deleteCustomer method of CustomerService class, in customer-service");
+		log.info("Inside of getCustomer method of CustomerService class, in customer-service");
 		return customerRepository.findById(customerId).get();
 	}
 }

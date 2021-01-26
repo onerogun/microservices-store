@@ -55,28 +55,34 @@ public class ItemController {
         return  new ResponseEntity<>(itemService.getItem(itemId), HttpStatus.OK);
     }
 
-    @PostMapping("/addItem")
-    public ResponseEntity<Item> addItem(@RequestBody Item item) {
+    @GetMapping("/getUserItems/{userId}")
+    public ResponseEntity<List<Item>>  getUserItems(@PathVariable Long userId) {
+        log.info("Inside of getUserItems method of ItemController Class in item-service");
+        return new ResponseEntity<>(itemService.getUserItems(userId), HttpStatus.OK);
+    }
+
+    @PostMapping("/addItem/{userId}")
+    public ResponseEntity<Item> addItem(@RequestBody Item item, @PathVariable Long userId) {
         log.info("Inside of addItem method of ItemController Class in item-service");
         log.info(item.toString());
-        if (item != null) {
-            return new ResponseEntity<>(itemService.addItem(item), HttpStatus.OK);
+        if (item != null && userId != null) {
+            return new ResponseEntity<>(itemService.addItem(item, userId), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
     }
 
-    @PostMapping("/updateItem")
-    public ResponseEntity<Item> updateItem(@RequestBody Item item) {
+    @PostMapping("/updateItem/{userId}")
+    public ResponseEntity<Item> updateItem(@RequestBody Item item, @PathVariable Long userId) {
         log.info("Inside of updateItem method of ItemController Class in item-service");
-        Item updatedItem = itemService.updateItem(item);
+        Item updatedItem = itemService.updateItem(item, userId);
         return new ResponseEntity(updatedItem, updatedItem == null ? HttpStatus.BAD_REQUEST : HttpStatus.OK);
     }
 
-    @DeleteMapping("/deleteItem/{itemId}")
-    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId) {
+    @DeleteMapping("/deleteItem/{itemId}/{userId}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long itemId, @PathVariable Long userId ) {
         log.info("Inside of deleteItem method of ItemController Class in item-service");
-        if(itemService.deleteItem(itemId)) {
+        if(itemService.deleteItem(itemId , userId)) {
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.badRequest().build();

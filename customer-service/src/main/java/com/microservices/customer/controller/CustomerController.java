@@ -23,13 +23,13 @@ public class CustomerController {
 		return customerService.getCustomerList();
 	}
 
-	@GetMapping("/{customerId}")
+	@GetMapping("getCustomer/{customerId}")
 	public Customer getCustomer(@PathVariable Long customerId) {
 		log.info("Inside of getCustomer method of CustomerController class, in customer-service");
 		return customerService.getCustomer(customerId);
 	}
 	
-	@PostMapping("/save")
+	@PostMapping("/saveCustomer")
 	public ResponseEntity<Customer> setCustomer(@RequestBody Customer customer) {
 		log.info("Inside of setCustomer method of CustomerController class, in customer-service");
 		return new ResponseEntity<>(customerService.saveCustomer(customer), HttpStatus.OK);

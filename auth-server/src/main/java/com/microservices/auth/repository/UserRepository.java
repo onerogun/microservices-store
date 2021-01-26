@@ -8,6 +8,8 @@ import java.util.Optional;
 
 @DynamicUpdate
 public interface UserRepository extends JpaRepository<User, Long> {
+    boolean existsByUserNameOrUserEMail(String userName,String userEMail);
+    boolean existsByUserNameAndUserEMail(String userName,String userEMail);
     boolean existsByUserName(String userName);
     boolean existsByUserEMail(String userEMail);
     Optional<User> findByUserEMail(String userEMail);

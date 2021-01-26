@@ -17,6 +17,8 @@ public class UserToUserToSendConverter implements Converter<User, UserToSend> {
         userToSend.setUserId(user.getUserId());
         userToSend.setUserName(user.getUserName());
         userToSend.setCustomerFK(user.getCustomerFK());
+        userToSend.setUserEMail(user.getUserEMail());
+        userToSend.setUserRoles(user.getRoles());
         return userToSend;
     }
 }

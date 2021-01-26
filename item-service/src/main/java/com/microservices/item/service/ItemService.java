@@ -63,14 +63,16 @@ public class ItemService {
         return response;
     }
 
-    public Item addItem(Item item) {
+    public Item addItem(Item item, Long userId) {
         log.info("Inside of addItem method  of ItemService class, item-service");
+        item.setItemOwner(userId);
         return itemRepository.save(item);
     }
 
-    public Item updateItem(Item item) {
+    public Item updateItem(Item item, Long userId) {
         log.info("Inside of updateItem method  of ItemService class, item-service");
-        if (item != null && itemRepository.existsById(item.getItemId())) {
+        item.setItemOwner(userId);
+        if (item != null && itemRepository.existsByItemIdAndItemOwner(item.getItemId(), userId)) {
             return itemRepository.save(item);
         } else  {
             return null;
@@ -108,9 +110,9 @@ public class ItemService {
 
     }
 
-    public boolean deleteItem(Long itemId) {
+    public boolean deleteItem(Long itemId , Long userId) {
         log.info("Inside of deleteItem method  of ItemService class, item-service");
-        if(itemRepository.existsById(itemId)) {
+        if(itemRepository.existsByItemIdAndItemOwner(itemId, userId)) {
             itemRepository.deleteById(itemId);
             return true;
         } else {
@@ -160,5 +162,9 @@ public class ItemService {
         itemRepository.findByItemNameStartingWith(word)
                 .stream().limit(10).collect(Collectors.toList());
         return searchResult;
+    }
+
+    public List<Item> getUserItems(Long userId) {
+       return itemRepository.findByItemOwner(userId);
     }
 }

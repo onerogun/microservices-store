@@ -19,6 +19,7 @@ public class UserToSendToUserConverter implements Converter<UserToSend, User> {
     public User convert(UserToSend userToSend) {
        User user = userRepository.findById(userToSend.getUserId()).get();
        user.setUserName(userToSend.getUserName());
+       user.setUserEMail(user.getUserEMail());
        return user;
     }
 }

@@ -95,11 +95,11 @@ public class AuthService {
        return toSendConverter.convert(user);
     }
 
+    @Transactional
     public ResponseEntity<String> saveCustomer(CustomerSignup customerSignup) {
         log.info("In saveCustomer method of AuthService class, auth-server");
-        boolean existByUserName = userRepository.existsByUserName(customerSignup.getUserName());
-        boolean existByEMail = userRepository.existsByUserEMail(customerSignup.getCustomerEMail());
-        if(!existByUserName && !existByEMail) {
+
+        if(!userRepository.existsByUserNameOrUserEMail(customerSignup.getUserName(), customerSignup.getCustomerEMail())) {
             User user = new User();
             user.setUserName(customerSignup.getUserName());
             user.setPassword(passwordConfig.passwordEncoder().encode(customerSignup.getPassword()));
@@ -120,7 +120,7 @@ public class AuthService {
             customer.setCustomerEMail(customerSignup.getCustomerEMail());
             customer.setUserFK(savedUser.getUserId());
 
-            String url = "http://customer-service/customer/save";
+            String url = "http://customer-service/customer/saveCustomer";
 
 
             /**
@@ -132,9 +132,9 @@ public class AuthService {
             User updatedUser = userRepository.save(savedUser);
 
            return new ResponseEntity<>("Sign up successful!", HttpStatus.OK);
-        }else if(existByUserName && existByEMail) {
+        }else if(userRepository.existsByUserNameAndUserEMail(customerSignup.getUserName(), customerSignup.getCustomerEMail())) {
             return new ResponseEntity<>("There is already an account with this User Name and e-mail, if your forgot your password, click Reset Password button!", HttpStatus.NOT_ACCEPTABLE);
-        } else if(existByUserName) {
+        } else if(userRepository.existsByUserName(customerSignup.getUserName())) {
             return new ResponseEntity<>("Username exists, select another one!", HttpStatus.NOT_ACCEPTABLE);
         } else {
             return new ResponseEntity<>("There is already an account with this e-mail, if your forgot your password, click Reset Password button!", HttpStatus.NOT_ACCEPTABLE);
@@ -144,7 +144,7 @@ public class AuthService {
 
     public UserToSend UpdateReactUser(UserToSend userToUpdate) {
         log.info("In UpdateReactUser method of AuthService class, auth-server");
-        if(userRepository.existsByUserName(userToUpdate.getUserName())) {
+        if(!userRepository.existsByUserNameOrUserEMail(userToUpdate.getUserName(), userToUpdate.getUserEMail())) {
             return null;
         } else {
             User updated = userRepository.save(toUserConverter.convert(userToUpdate));

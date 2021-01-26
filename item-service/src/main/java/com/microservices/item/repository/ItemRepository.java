@@ -14,4 +14,6 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long> {
     List<Item> findByItemNameStartingWith(String word);
     Page<Item> findByItemPriceBetween(Pageable page, BigDecimal minimum, BigDecimal maximum);
+    boolean existsByItemIdAndItemOwner(Long itemId,Long itemOwner);
+    List<Item> findByItemOwner(Long itemOwner);
 }

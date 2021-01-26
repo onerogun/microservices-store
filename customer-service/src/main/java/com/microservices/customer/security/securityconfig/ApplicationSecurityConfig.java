@@ -31,11 +31,11 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         http    .cors().and()
                 .csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.NEVER)
-                .and().requestMatchers().antMatchers("/customer/*", "/customer/delete/*", "/customer/update/*", "/customer/getall")
+                .and().requestMatchers().antMatchers("/customer/getCustomer/*", "/customer/delete/*", "/customer/update/*", "/customer/getall")
                 .and().addFilterBefore(jwtTokenVerifier, UsernamePasswordAuthenticationFilter.class)
                 .authorizeRequests()
                 //.antMatchers("/items/getItems").permitAll()
-                .antMatchers("/customer/*", "/customer/delete/*", "/customer/update/*").hasAnyRole(PRIME_USER.name(), USER.name())
+                .antMatchers("/customer/getCustomer/*", "/customer/delete/*", "/customer/update/*").hasAnyRole(ADMIN.name(),PRIME_USER.name(), USER.name())
                 .and().authorizeRequests()
                 .antMatchers("/customer/getall").hasRole(ADMIN.name())
                 .anyRequest().authenticated();
