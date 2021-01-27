@@ -80,6 +80,13 @@
 			<version>1.6.1</version>
 		</dependency>
 
+		<!-- https://mvnrepository.com/artifact/io.github.resilience4j/resilience4j-timelimiter -->
+		<dependency>
+			<groupId>io.github.resilience4j</groupId>
+			<artifactId>resilience4j-timelimiter</artifactId>
+			<version>1.6.0</version>
+		</dependency>
+
 
 
 
