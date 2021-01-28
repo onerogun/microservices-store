@@ -34,6 +34,7 @@ services:
     ports:
       - "15672:15672"
       - "5672:5672"
+      - "61613:61613"
     volumes:
       - "./rabbitmq_plugins/enabled_plugins:/etc/rabbitmq/enabled_plugins"
 
