@@ -11,12 +11,8 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class ConverterOrderContentOrderItem implements Converter<OrderContent, OrderItem> {
 
-
     @Autowired
     private RestTemplate restTemplate;
-
-
-
 
     @Override
     public OrderItem convert(OrderContent source) {
@@ -29,6 +25,7 @@ public class ConverterOrderContentOrderItem implements Converter<OrderContent, O
         orderItem.setOrderItemPrice(item.getItemPrice());
         orderItem.setOrderItemFeatured(item.isItemFeatured());
         orderItem.setOrderItemAmountOrdered(source.getItemAmount());
+        orderItem.setOrderItemOwner(item.getItemOwner());
 
         return orderItem;
     }

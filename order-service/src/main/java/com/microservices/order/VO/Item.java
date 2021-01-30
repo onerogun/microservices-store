@@ -20,6 +20,8 @@ public class Item {
 	private String itemCategory;
 	private boolean itemFeatured;
 	private int itemLeftInStock;
+
+	private Long itemOwner;
 	
 
 }
