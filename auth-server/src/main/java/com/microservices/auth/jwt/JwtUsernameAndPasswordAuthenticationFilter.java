@@ -6,7 +6,10 @@ import com.microservices.auth.repository.UserRepository;
 import com.microservices.auth.streamchannel.OutputChannel;
 import com.microservices.auth.tokenrepo.TokenInDB;
 import com.microservices.auth.tokenrepo.TokenRepository;
+import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.MalformedJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.stream.messaging.Source;
 import org.springframework.integration.support.MessageBuilder;
@@ -96,6 +99,7 @@ public class JwtUsernameAndPasswordAuthenticationFilter extends UsernamePassword
         }else {
             log.info("Token exists in DB and returning it from db");
            token = tokenRepository.findById(authentication.getName()).get().getToken();
+
         }
 
 

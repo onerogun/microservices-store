@@ -2,6 +2,7 @@ package com.microservices.auth.jwt;
 
 import com.google.common.base.Strings;
 import com.microservices.auth.repository.UserRepository;
+import com.microservices.auth.tokenrepo.TokenRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.JwtException;
@@ -30,12 +31,14 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
     private final SecretKey secretKey;
     private final JwtConfig jwtConfig;
     private final UserRepository userRepository;
+    private final TokenRepository tokenRepository;
 
     public JwtTokenVerifier(SecretKey secretKey,
-                            JwtConfig jwtConfig, UserRepository userRepository) {
+                            JwtConfig jwtConfig, UserRepository userRepository, TokenRepository tokenRepository) {
         this.secretKey = secretKey;
         this.jwtConfig = jwtConfig;
         this.userRepository = userRepository;
+        this.tokenRepository = tokenRepository;
     }
 
     @Override
@@ -79,13 +82,17 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             Long customerFk = userRepository.findByUserName(authentication.getName()).get().getCustomerFK();
+
             response.setHeader(org.springframework.http.HttpHeaders.COOKIE, "custFK=" + String.valueOf(customerFk));
 
         } catch (JwtException e) {
-            throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
+          //  throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
+            log.info(String.format("Token %s cannot be trusted", token));
+           if(tokenRepository.existsByToken(token)){
+               log.info("Removing useless token");
+               tokenRepository.deleteByToken(token);
+           }
         }
-
-
         filterChain.doFilter(request, response);
     }
 }

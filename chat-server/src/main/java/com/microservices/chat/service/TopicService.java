@@ -1,15 +1,14 @@
 package com.microservices.chat.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
+@Slf4j
 public class TopicService {
 
     @Autowired
@@ -32,13 +31,18 @@ public class TopicService {
      * @param topic
      */
     public void addTopic(Long userId, String topic) {
+        log.info("Inside of addTopic method, TopicService class, chat-server");
+        log.info("user id: " + userId + " topic: " + topic);
        if(topicMap.get(userId) != null) {
+           log.info("user has list");
             if(!topicMap.get(userId).contains(topic)){
                 topicMap.get(userId).add(topic);
                 messagingTemplate.convertAndSend("/queue/" + userId, topicMap.get(userId));
             }
        } else {
-           topicMap.put(userId, Arrays.asList(topic));
+           List<String> topicList = new ArrayList<>();
+           topicList.add(topic);
+           topicMap.put(userId, topicList);
            messagingTemplate.convertAndSend("/queue/" + userId, topicMap.get(userId));
        }
     }

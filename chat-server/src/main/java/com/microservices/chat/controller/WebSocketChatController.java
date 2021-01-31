@@ -36,12 +36,24 @@ public class WebSocketChatController {
     @SendToUser
     public String chat(@Payload WebSocketChatMessage message) {
 
+        try {
+
+            if (message.getPublisher() == null || message.getSubscriber() == null) {
+                throw new NullPointerException("Cannot be null!");
+            }
+
             log.info(message.toString());
-            String topicName = generateTopicName(message.getPublisher(), message.getSubscriber());
-            topicService.addTopic(Long.valueOf(message.getSubscriber()),topicName );
-            messagingTemplate.convertAndSend("/queue/" + topicName, message.getContent());
+            String topicNameForSubscriber = generateTopicName(message.getPublisher(), message.getSubscriber());
+            String topicNameForPublisher = generateTopicName(message.getSubscriber(), message.getPublisher());
+            topicService.addTopic(Long.valueOf(message.getSubscriber()), topicNameForSubscriber);
+            topicService.addTopic(Long.valueOf(message.getPublisher()), topicNameForPublisher);
+            messagingTemplate.convertAndSend("/queue/" + topicNameForSubscriber, message.getContent());
             return message.getContent();
 
+        } catch (NullPointerException ex) {
+            log.info("Pub: " +message.getPublisher() + "Sub: " + message.getSubscriber());
+        }
+        return "Could not send message!";
     }
 
 

@@ -62,7 +62,7 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and().authorizeRequests().antMatchers("/auth/passwordReset/checkLinkValidity/*","/auth/resetPassword","/auth/resetPasswordByLink/*", "/auth/save", "/auth/saveCustomer").permitAll().and()
                 .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey,tokenRepository, userRepository, outputChannel))
-                .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig, userRepository),JwtUsernameAndPasswordAuthenticationFilter.class)
+                .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig, userRepository, tokenRepository),JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
               //  .antMatchers("/auth/save", "/auth/saveCustomer").permitAll()
                 .antMatchers("/auth/delete/*", "/auth/update/*", "/auth/getAll", "/auth/getUser/*").hasAnyRole(ADMIN.name(), USER.name(), PRIME_USER.name())
