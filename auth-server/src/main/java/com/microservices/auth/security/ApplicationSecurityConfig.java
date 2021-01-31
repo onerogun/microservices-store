@@ -59,13 +59,13 @@ public class ApplicationSecurityConfig extends WebSecurityConfigurerAdapter {
         http    .cors().and()
                 .csrf().disable()
                 .sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests().antMatchers("/auth/passwordReset/checkLinkValidity/*","/auth/resetPassword","/auth/resetPasswordByLink/*", "/auth/save", "/auth/saveCustomer").permitAll().and()
+                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
+               // .and().authorizeRequests().antMatchers("/auth/passwordReset/checkLinkValidity/*","/auth/resetPassword","/auth/resetPasswordByLink/*", "/auth/save", "/auth/saveCustomer", "/auth/checkJWT").permitAll().and()
                 .addFilter(new JwtUsernameAndPasswordAuthenticationFilter(authenticationManager(), jwtConfig, secretKey,tokenRepository, userRepository, outputChannel))
                 .addFilterAfter(new JwtTokenVerifier(secretKey, jwtConfig, userRepository, tokenRepository),JwtUsernameAndPasswordAuthenticationFilter.class)
                 .authorizeRequests()
               //  .antMatchers("/auth/save", "/auth/saveCustomer").permitAll()
-                .antMatchers("/auth/delete/*", "/auth/update/*", "/auth/getAll", "/auth/getUser/*").hasAnyRole(ADMIN.name(), USER.name(), PRIME_USER.name())
+                .antMatchers("/auth/delete/*", "/auth/update/*", "/auth/getAll", "/auth/getUser/*", "/auth/checkJWT").hasAnyRole(ADMIN.name(), USER.name(), PRIME_USER.name())
                 .anyRequest().authenticated();
 
     }

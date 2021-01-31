@@ -85,6 +85,7 @@ public class JwtTokenVerifier extends OncePerRequestFilter {
 
             response.setHeader(org.springframework.http.HttpHeaders.COOKIE, "custFK=" + String.valueOf(customerFk));
 
+            log.info("token valid, authorized!!");
         } catch (JwtException e) {
           //  throw new IllegalStateException(String.format("Token %s cannot be trusted", token));
             log.info(String.format("Token %s cannot be trusted", token));

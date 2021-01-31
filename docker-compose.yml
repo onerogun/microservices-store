@@ -21,9 +21,8 @@ services:
   prometheus:
     image: prom/prometheus:latest
     volumes:
-      - ./prometheus:/etc/prometheus
-      - .prometheus-data:/prometheus
-    command: --web.enable-lifecycle  --config.file=/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
 

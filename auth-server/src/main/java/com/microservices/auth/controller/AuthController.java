@@ -30,8 +30,8 @@ public class AuthController {
     }
 
     @GetMapping("/checkJWT")
-    public ResponseEntity<Void> checkJWT() {
-        return ResponseEntity.ok().build();
+    public ResponseEntity<String> checkJWT() {
+        return new ResponseEntity<>("jwt valid!", HttpStatus.OK);
     }
 
     @PostMapping("/save")

@@ -1,0 +1,4 @@
+.datadir/
+.prometheus-data/
+prometheus.yml/
+rabbitmq_plugins/
