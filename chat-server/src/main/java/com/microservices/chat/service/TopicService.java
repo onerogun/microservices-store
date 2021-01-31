@@ -1,27 +1,34 @@
 package com.microservices.chat.service;
 
+import com.microservices.chat.topicrepo.UserSubscribedTopicList;
+import com.microservices.chat.topicrepo.UserSubscribedTopicListRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessageSendingOperations;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.UnaryOperator;
 
 @Service
 @Slf4j
 public class TopicService {
 
-    @Autowired
-    private SimpMessageSendingOperations messagingTemplate;
 
-    private Map<Long, List<String>> topicMap;
+    private final SimpMessageSendingOperations messagingTemplate;
 
-    public TopicService() {
-        this.topicMap = new HashMap<>();
+    private final UserSubscribedTopicListRepository userSubscribedTopicListRepository;
+
+    public TopicService(SimpMessageSendingOperations messagingTemplate, UserSubscribedTopicListRepository userSubscribedTopicListRepository) {
+        this.messagingTemplate = messagingTemplate;
+        this.userSubscribedTopicListRepository = userSubscribedTopicListRepository;
     }
+    
 
-    public List<String> getTopics(Long userId) {
-       return topicMap.get(userId);
+    public Set<String> getTopics(Long userId) {
+        log.info("Inside of getTopics method, TopicService class, chat-server");
+       UserSubscribedTopicList userSubscribedTopicList = userSubscribedTopicListRepository.findById(userId).block();
+        return userSubscribedTopicList == null ? null : userSubscribedTopicList.getTopicList();
     }
 
     /**
@@ -33,17 +40,28 @@ public class TopicService {
     public void addTopic(Long userId, String topic) {
         log.info("Inside of addTopic method, TopicService class, chat-server");
         log.info("user id: " + userId + " topic: " + topic);
-       if(topicMap.get(userId) != null) {
-           log.info("user has list");
-            if(!topicMap.get(userId).contains(topic)){
-                topicMap.get(userId).add(topic);
-                messagingTemplate.convertAndSend("/queue/" + userId, topicMap.get(userId));
+        userSubscribedTopicListRepository.existsById(userId).subscribe(aBoolean -> {
+            if(aBoolean) {
+                log.info("user has list");
+                   userSubscribedTopicListRepository.findById(userId).subscribe(userSubscribedTopicList -> {
+                       log.info("User list in DB: " + userSubscribedTopicList.toString());
+                       userSubscribedTopicList.getTopicList().add(topic);
+                       userSubscribedTopicListRepository.save(userSubscribedTopicList).subscribe(userSubscribedTopicList1 -> {
+                           log.info("saved list in DB: " + userSubscribedTopicList1.toString());
+                           messagingTemplate.convertAndSend("/queue/" + userId, userSubscribedTopicList1.getTopicList());
+                       });
+                   });
+
+
+            } else {
+                Set<String> topicList = new HashSet<>();
+                topicList.add(topic);
+               userSubscribedTopicListRepository.save(new UserSubscribedTopicList(userId, topicList)).subscribe(userSubscribedTopicList -> {
+                   messagingTemplate.convertAndSend("/queue/" + userId, userSubscribedTopicList.getTopicList());
+               });
+
             }
-       } else {
-           List<String> topicList = new ArrayList<>();
-           topicList.add(topic);
-           topicMap.put(userId, topicList);
-           messagingTemplate.convertAndSend("/queue/" + userId, topicMap.get(userId));
-       }
+        });
+
     }
 }

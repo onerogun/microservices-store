@@ -36,4 +36,6 @@
  
  After placing an order, order details are sent with e-mail
 
+ Users can private-chat with each other
+
  

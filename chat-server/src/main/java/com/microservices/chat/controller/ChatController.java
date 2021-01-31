@@ -2,17 +2,11 @@ package com.microservices.chat.controller;
 
 import com.microservices.chat.service.TopicService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
 import org.springframework.messaging.simp.annotation.SubscribeMapping;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
+import java.util.Set;
 
 @Controller
 @Slf4j
@@ -32,7 +26,7 @@ public class ChatController {
      */
 
     @SubscribeMapping("/getTopics/{userId}")
-    public List<String> getSubscribedTopics(@DestinationVariable Long userId) {
+    public Set<String> getSubscribedTopics(@DestinationVariable Long userId) {
         log.info("<<<<<<<<<<<<<< sending topics:: >>>>>>>>> " + userId);
        return topicService.getTopics(userId);
     }
