@@ -19,7 +19,7 @@ jobs:
           java-version: 1.8
 
       - name: Grant execute permisson to mvnw
-        run: chmod +x mvnw
+        run: chmod +x ./auth-server/mvnw
 
       - name: Build image with Maven
         run: ./auth-server/mvnw spring-boot:build-image
