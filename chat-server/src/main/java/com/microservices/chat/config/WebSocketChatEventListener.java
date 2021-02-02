@@ -16,8 +16,7 @@ import org.springframework.web.socket.messaging.SessionDisconnectEvent;
 @Slf4j
 public class WebSocketChatEventListener {
 
-    @Autowired
-    private SimpMessageSendingOperations messagingTemplate;
+
 
     @EventListener
     public void handleWebSocketConnectListener(SessionConnectedEvent event) {
