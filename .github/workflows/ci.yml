@@ -19,7 +19,7 @@ jobs:
           java-version: 1.8
 
       - name: Build image with Maven
-        run: ./auth-server/mvn -B package --file pom.xml
+        run: ./auth-server/mvnw -B package --file pom.xml
 
       - uses: mr-smithers-excellent/docker-build-push@v5
         name: Build & push Docker image
