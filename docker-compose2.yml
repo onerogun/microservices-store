@@ -1,0 +1,44 @@
+version: '3.5'
+services:
+
+  zipkin:
+    image: openzipkin/zipkin:latest
+    ports:
+      - "9411:9411"
+
+
+  mysqldb:
+    image: mysql:latest
+    environment:
+      - MYSQL_ROOT_PASSWORD=pass
+      - MYSQL_USER=ogn
+      - MYSQL_PASSWORD=ogn
+    ports:
+      - "3307:3306"
+    volumes:
+      - .datadir:/var/lib/mysql
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
+    ports:
+      - "9090:9090"
+
+
+  rabbitmq:
+    image: rabbitmq:management
+    hostname: "rabbitmq"
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+      - "61613:61613"
+    volumes:
+      - "./rabbitmq_plugins/enabled_plugins:/etc/rabbitmq/enabled_plugins"
+
+  redis:
+    image: redis:latest 
+    ports:
+      - "6379:6379"
+

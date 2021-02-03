@@ -1,11 +1,35 @@
 version: '3.5'
 services:
 
+
   zipkin:
     image: openzipkin/zipkin:latest
     ports:
       - "9411:9411"
 
+  mongodb:
+    image: mongo
+    ports:
+      - "1111:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+
+  mongo-express:
+    image: mongo-express
+    ports:
+      - 8081:8081
+    restart: always
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: root
+      ME_CONFIG_MONGODB_ADMINPASSWORD: root
+      ME_CONFIG_MONGODB_SERVER: mongodb
+      ME_CONFIG_MONGODB_PORT: 27017
+
+  cloud-config-server:
+    image: ogunfz09/cloudconfigserver:latest
+    depends_on:
+      - zipkin
 
   mysqldb:
     image: mysql:latest
@@ -17,6 +41,9 @@ services:
       - "3307:3306"
     volumes:
       - .datadir:/var/lib/mysql
+    depends_on:
+      - cloud-config-server
+
 
   prometheus:
     image: prom/prometheus:latest
@@ -25,6 +52,9 @@ services:
     command: --web.enable-lifecycle --config.file=/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
+    depends_on:
+      - discovery-server
+      - cloud-gateway
 
 
   rabbitmq:
@@ -41,4 +71,81 @@ services:
     image: redis:latest 
     ports:
       - "6379:6379"
+
+
+  discovery-server:
+    image: ogunfz09/discoveryserver:latest
+    ports:
+      - "8761:8761"
+    depends_on:
+      - cloud-config-server
+
+  cloud-gateway:
+    image: ogunfz09/cloudgateway:latest
+    ports:
+      - "9191:9191"
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+
+  customer-service:
+    image: ogunfz09/customerservice:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+
+  item-service:
+    image: ogunfz09/itemservice:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+
+  order-service:
+    image: ogunfz09/orderservice:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+
+  chat-server:
+    image: ogunfz09/chat-server:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+    ports:
+      - "7979:7979"
+
+  storage-service:
+    image: ogunfz09/storage-service:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+
+
+  email-service:
+    image: ogunfz09/email-service:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+
+  item-details-service:
+    image: ogunfz09/item-details-reactive:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+
+  auth-server:
+    image: ogunfz09/authserver:latest
+    depends_on:
+      - discovery-server
+      - cloud-config-server
+      - mysqldb
+
+
 
