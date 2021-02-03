@@ -1,4 +1,4 @@
-name: AUTH server CI
+name: storage-service CI
 
 on:
   push:
@@ -27,5 +27,5 @@ jobs:
       - name: run docker push
         run: |
           docker login -u ${{ secrets.DOCKER_USERNAME }} -p ${{ secrets.DOCKER_PASSWORD }}
-          docker tag auth-server:0.0.1-SNAPSHOT ogunfz09/authserver
-          docker push ogunfz09/authserver
+          docker tag storage-service:0.0.1-SNAPSHOT ogunfz09/storage-service
+          docker push ogunfz09/storage-service

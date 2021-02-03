@@ -3,8 +3,8 @@ spring:
     name: cloud-gateway
   cloud:
     config:
-      #     uri: http://cloud-config-server:9595
-      uri: http://localhost:9595
+      uri: http://cloud-config-server:9595
+      #uri: http://localhost:9595
       fail-fast: true
       retry:
         initial-interval: 5000
